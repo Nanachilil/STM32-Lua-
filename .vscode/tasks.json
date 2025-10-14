@@ -1,0 +1,82 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "🧩 build/configure",
+            "type": "shell",
+            "command": "cmake",
+            "args": [
+                "-S", ".",
+                "-B", "build/Debug",
+                "-G", "Ninja",
+                "-DCMAKE_BUILD_TYPE=Debug",
+                "-DCMAKE_TOOLCHAIN_FILE=cmake/gcc-arm-none-eabi.cmake"
+            ]
+        },
+        {
+            "label": "🧩 build/compile",
+            "type": "shell",
+            "command": "cmake",
+            "args": ["--build", "build/Debug"]
+        },
+        {
+            "label": "🧩 build/all",
+            "dependsOn": [
+                "🧩 build/configure",
+                "🧩 build/compile"
+            ],
+            "dependsOrder": "sequence",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "detail": "执行 CMake 配置、编译、链接全过程"
+        },
+        // =====================  Level 1: 编译产物清理  =====================
+        {
+            "label": "🧹 Clean/Target (CMake)",
+            "type": "shell",
+            "command": "cmake",
+            "args": [
+                "--build",
+                "build/Debug",
+                "--target",
+                "clean"
+            ],
+            "group": "build",
+            "detail": "删除 .o / .elf / .map 等编译产物，但保留 CMake 构建缓存"
+        },
+        // =====================  Level 3: 全部清理  =====================
+        {
+            "label": "🧹 Clean/Full (Delete build folder)",
+            "type": "shell",
+            "command": "bash",
+            "args": [
+                "-c",
+                "rm -rf build/Debug"
+            ],
+            "group": "build",
+            "detail": "删除整个 build/Debug 文件夹，下次需要重新 Configure"
+        },
+        {
+            "label": "Flash STM32 (SWD)",
+            "type": "shell",
+            "command": "/Users/nana/env/ST/STM32CubeCLT_1.19.0/STM32CubeProgrammer/bin/STM32_Programmer_CLI",
+            "args": [
+                "-c", "port=SWD", "sn=0671FF555071494867171720",
+                "-w", "${workspaceFolder}/build/Debug/lvgl_board.elf",
+                "-v", "-rst"
+            ],
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared",
+                "clear": false
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            },
+            "detail": "通过 ST-LINK (SWD 模式) 烧录 lvgl_board.elf 到 STM32"
+        }
+    ]
+}
