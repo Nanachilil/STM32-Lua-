@@ -243,7 +243,7 @@ void Error_Handler(void);
 #define NBL1_GPIO_Port GPIOE
 
 /* USER CODE BEGIN Private defines */
-
+extern UART_HandleTypeDef huart5;
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus
